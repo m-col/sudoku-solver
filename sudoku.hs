@@ -1,5 +1,7 @@
 #!/usr/bin/env runhaskell
 
+{-# LANGUAGE TupleSections #-}
+
 {-
 sudoku-solver script. Copyright Matt Colligan 2022.
 -}
@@ -41,15 +43,15 @@ isValid :: Puzzle -> Bool
 isValid p = all (goodSet p) blocks
   where
     goodSet :: Puzzle -> [Index] -> Bool
-    goodSet p = noRepeats . catMaybes . map ((!) p)
+    goodSet p = noRepeats . mapMaybe (p !)
 
     noRepeats cs = length cs == length (nub cs)
 
     blocks :: [[Index]]
     blocks = concat [rows, cols, boxes]
-    rows = map (\r -> map ((,) r) set) set
-    cols = map (\c -> map (flip (,) c) set) set
-    boxes = map makeBox [(r, c) | r <- [One, Four, Seven], c <- [One, Four, Seven]]
+    rows = map (\r -> map (r,) set) set
+    cols = map (\c -> map (,c) set) set
+    boxes = [makeBox (r, c) | r <- [One, Four, Seven], c <- [One, Four, Seven]]
 
     makeBox :: Index -> [Index]
     makeBox (r, c) = [(r, c) | r <- [r .. succ . succ $ r], c <- [c .. succ . succ $ c]]
