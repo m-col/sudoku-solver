@@ -1,4 +1,5 @@
 #!/usr/bin/env runhaskell
+
 {-
 sudoku-solver script. Copyright Matt Colligan 2022.
 -}
@@ -113,15 +114,15 @@ solve p = go [(p, (One, One), One)] (Just (One, One)) One
     -}
     go :: [(Puzzle, Index, Cell)] -> Maybe Index -> Cell -> Maybe Puzzle
     -- We are finished when the maybe index is Nothing.
-    go ((p, _, _):_) Nothing _ = Just p
+    go ((p, _, _) : _) Nothing _ = Just p
     go pps@((p, pi, pc) : ps) (Just i) c
         -- This index is already filled - continue.
-        | isJust (p ! i) = go ((puz p, pi, pc):ps) (next i) One
+        | isJust (p ! i) = go ((puz p, pi, pc) : ps) (next i) One
         -- This index is empty - let's find a possibly valid value.
         | otherwise =
             case getOptions p i c of
                 [] -> Nothing
-                opts -> listToMaybe . mapMaybe (\o -> go ((puz o, i, c):pps) (next i) One) $ opts
+                opts -> listToMaybe . mapMaybe (\o -> go ((puz o, i, c) : pps) (next i) One) $ opts
 
     getOptions :: Puzzle -> Index -> Cell -> [Puzzle]
     getOptions p i c = filter isValid . map (\c -> p // [(i, Just c)]) $ [c .. Nine]
@@ -155,7 +156,7 @@ Load a puzzle from file.
 loadPuzzle :: [Char] -> Puzzle
 loadPuzzle = asArray . zip indices . map parse . filter (`elem` chars)
   where
-    chars = [' '] ++ ['1'..'9']
+    chars = [' '] ++ ['1' .. '9']
     indices = [(r, c) | r <- set, c <- set]
 
     parse :: Char -> Maybe Cell
@@ -171,7 +172,7 @@ main = do
     putStrLn . showPuzzle $ puzzle
 
     case solve puzzle of
-        Nothing -> 
+        Nothing ->
             putStrLn "Failed! Is the puzzle valid?"
         Just solved -> do
             putStrLn "Completed:"
