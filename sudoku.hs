@@ -58,28 +58,28 @@ isValid p = all (goodSet p) blocks
 Solve the given puzzle!
 -}
 solve :: Puzzle -> Maybe Puzzle
-solve p = go [(p, (One, One), One)] (Just (One, One)) One
+solve p = go [(p, (One, One))] (Just (One, One))
   where
     {-
     The first argument here is the stack of steps taken since the beginning. Each
-    element of the list is the new state of the puzzle, and the index + new value
-    inserted to get there. pc was put at pi to make p. The remaining 2 argments are what
-    we are going to be testing this iteration.
+    element of the list is the new state of the puzzle, and the index that was filled to
+    get there. The second argument index is where we are going to be testing this
+    iteration.
     -}
-    go :: [(Puzzle, Index, Cell)] -> Maybe Index -> Cell -> Maybe Puzzle
+    go :: [(Puzzle, Index)] -> Maybe Index -> Maybe Puzzle
     -- We are finished when the maybe index is Nothing.
-    go ((p, _, _) : _) Nothing _ = Just p
-    go pps@((p, pi, pc) : ps) (Just i) c
+    go ((p, _) : _) Nothing = Just p
+    go pps@((p, pi) : ps) (Just i)
         -- This index is already filled - continue.
-        | isJust (p ! i) = go ((puz p, pi, pc) : ps) (next i) One
+        | isJust (p ! i) = go ((puz p, pi) : ps) (next i)
         -- This index is empty - let's find a possibly valid value.
         | otherwise =
-            case getOptions p i c of
+            case getOptions p i of
                 [] -> Nothing
-                opts -> listToMaybe . mapMaybe (\o -> go ((puz o, i, c) : pps) (next i) One) $ opts
+                opts -> listToMaybe . mapMaybe (\o -> go ((puz o, i) : pps) (next i)) $ opts
 
-    getOptions :: Puzzle -> Index -> Cell -> [Puzzle]
-    getOptions p i c = filter isValid . map (\c -> p // [(i, Just c)]) $ [c .. Nine]
+    getOptions :: Puzzle -> Index -> [Puzzle]
+    getOptions p i = filter isValid . map (\c -> p // [(i, Just c)]) $ set
 
     -- Maybe-get the next Index, left to right, then top to bottom
     next :: Index -> Maybe Index
