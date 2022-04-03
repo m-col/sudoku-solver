@@ -137,18 +137,18 @@ solve p = go [(p, (One, One), One)] (Just (One, One)) One
 Graphically represent the puzzle layout.
 -}
 showPuzzle :: Puzzle -> String
-showPuzzle = (++) " " . unwords . map organise . assocs . fmap render
+showPuzzle = (<>) " " . unwords . map organise . assocs . fmap render
   where
     render Nothing = " "
     render (Just v) = show . (+) 1 . fromEnum $ v
 
     -- Check out this ugly stuff. It adds bars and newlines to render the puzzle.
-    organise ((_, Three), c) = c ++ " |"
-    organise ((_, Six), c) = c ++ " |"
-    organise ((Three, Nine), c) = c ++ "\n " ++ replicate 21 '-' ++ "\n"
-    organise ((Six, Nine), c) = c ++ "\n " ++ replicate 21 '-' ++ "\n"
-    organise ((_, Nine), c) = c ++ "\n"
-    organise (_, c) = c ++ ""
+    organise ((_, Three), c) = c <> " |"
+    organise ((_, Six), c) = c <> " |"
+    organise ((Three, Nine), c) = c <> "\n " <> replicate 21 '-' <> "\n"
+    organise ((Six, Nine), c) = c <> "\n " <> replicate 21 '-' <> "\n"
+    organise ((_, Nine), c) = c <> "\n"
+    organise (_, c) = c <> ""
 
 {-
 Load a puzzle from file.
@@ -156,7 +156,7 @@ Load a puzzle from file.
 loadPuzzle :: [Char] -> Puzzle
 loadPuzzle = asArray . zip indices . map parse . filter (`elem` chars)
   where
-    chars = [' '] ++ ['1' .. '9']
+    chars = [' '] <> ['1' .. '9']
     indices = [(r, c) | r <- set, c <- set]
 
     parse :: Char -> Maybe Cell
