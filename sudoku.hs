@@ -11,7 +11,7 @@ import Data.Array (Array, Ix, assocs, elems, listArray, (!), (//))
 import Data.Bool (bool)
 import Data.Char (digitToInt)
 import Data.List (nub, sort)
-import Data.Maybe (catMaybes, fromMaybe, isJust, listToMaybe, mapMaybe)
+import Data.Maybe (catMaybes, fromMaybe, isJust, isNothing, listToMaybe, mapMaybe)
 import System.Environment (getArgs)
 
 {-
@@ -57,7 +57,7 @@ isValid p = all (goodSet p) blocks
     makeBox (r, c) = [(r, c) | r <- [r .. succ . succ $ r], c <- [c .. succ . succ $ c]]
 
 {-
-Solve the given puzzle!
+Solve the puzzle!
 -}
 solve :: Puzzle -> Maybe Puzzle
 solve p = go [(p, (One, One))] (Just (One, One))
@@ -125,14 +125,9 @@ loadPuzzle = asArray . zip indices . map parse . filter (`elem` chars)
 main :: IO ()
 main = do
     args <- getArgs
-    contents <- readFile $ bool (head args) "puzzle_1.txt" (null args)
-    let puzzle = loadPuzzle contents
-    putStrLn "Puzzle:"
-    putStrLn . showPuzzle $ puzzle
-
-    case solve puzzle of
-        Nothing ->
-            putStrLn "Failed! Is the puzzle valid?"
-        Just solved -> do
-            putStrLn "Completed:"
-            putStrLn . showPuzzle $ solved
+    let file = bool (head args) "puzzle_1.txt" (null args)
+    solved <- solve . loadPuzzle <$> readFile file
+    putStrLn $
+        if isNothing solved
+            then "Failed! Is the puzzle valid?"
+            else "Completed!"
