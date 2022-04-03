@@ -91,7 +91,7 @@ solve p = go [(p, (One, One), One)] (Just (One, One)) One
 Graphically represent the puzzle layout.
 -}
 showPuzzle :: Puzzle -> String
-showPuzzle = (<>) " " . unwords . map organise . assocs . fmap render
+showPuzzle = (<>) "\ESC[2J " . unwords . map organise . assocs . fmap render
   where
     render Nothing = " "
     render (Just v) = show . (+) 1 . fromEnum $ v
