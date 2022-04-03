@@ -12,47 +12,18 @@ import Data.List (nub, sort)
 import Data.Maybe (catMaybes, fromMaybe, isJust, listToMaybe, mapMaybe)
 import System.Environment (getArgs)
 
+{-
+Screw dealing with IO when I can use trace. Sorry not sorry.
+-}
 import Debug.Trace
 
 puz p = trace (showPuzzle p) p
 
--- Puzzle #1
-puzzle :: Puzzle
-puzzle =
-    asArray
-        [ ((One, One), Just Five)
-        , ((One, Two), Just Six)
-        , ((One, Four), Just Eight)
-        , ((One, Nine), Just Nine)
-        , ((Two, Three), Just Three)
-        , ((Two, Five), Just Two)
-        , ((Two, Six), Just Six)
-        , ((Two, Eight), Just One)
-        , ((Three, Nine), Just Three)
-        , ((Four, Six), Just Nine)
-        , ((Four, Seven), Just Five)
-        , ((Five, Three), Just Eight)
-        , ((Five, Four), Just Five)
-        , ((Five, Seven), Just One)
-        , ((Six, Three), Just Four)
-        , ((Six, Four), Just Three)
-        , ((Seven, One), Just Three)
-        , ((Seven, Seven), Just Nine)
-        , ((Eight, One), Just Six)
-        , ((Eight, Four), Just Two)
-        , ((Eight, Five), Just One)
-        , ((Eight, Six), Just Four)
-        , ((Nine, Seven), Just Eight)
-        , ((Nine, Nine), Just Four)
-        ]
-
--- Converts the list of values above into an array of maybe values
-asArray :: [(Index, Maybe Cell)] -> Puzzle
-asArray vals = listArray ((One, One), (Nine, Nine)) (repeat Nothing) // vals
-
 type Puzzle = Array Index (Maybe Cell)
 
--- This is the set of possible values, rows and columns.
+{-
+This is the set of possible values, rows and columns.
+-}
 data Cell = One | Two | Three | Four | Five | Six | Seven | Eight | Nine
     deriving (Eq, Ord, Enum, Ix, Show)
 
@@ -63,42 +34,25 @@ set = [One .. Nine]
 type Index = (Cell, Cell)
 
 {-
-Test if the indices specified by cartesian product of row and column indices contain the
-values One to Nine, one each, and nothing else.
--}
-goodSet :: Puzzle -> [Index] -> Bool
-goodSet p = noRepeats . catMaybes . map ((!) p)
-  where
-    noRepeats cs = length cs == length (nub cs)
-
-{-
-Is the given puzzle valid, considering only the cells that do have values?
-
-Possible improvement: don't test every single row/column/box when making a change.
+Is the given puzzle valid, considering only the cells that do have values? Possible
+improvement: don't test every single row/column/box when making a change.
 -}
 isValid :: Puzzle -> Bool
 isValid p = all (goodSet p) blocks
-
-blocks :: [[Index]]
-blocks = concat [rows, cols, boxes]
   where
-    rows :: [[Index]]
+    goodSet :: Puzzle -> [Index] -> Bool
+    goodSet p = noRepeats . catMaybes . map ((!) p)
+
+    noRepeats cs = length cs == length (nub cs)
+
+    blocks :: [[Index]]
+    blocks = concat [rows, cols, boxes]
     rows = map (\r -> map ((,) r) set) set
-
-    cols :: [[Index]]
     cols = map (\c -> map (flip (,) c) set) set
-
-    boxes :: [[Index]]
     boxes = map makeBox [(r, c) | r <- [One, Four, Seven], c <- [One, Four, Seven]]
 
     makeBox :: Index -> [Index]
     makeBox (r, c) = [(r, c) | r <- [r .. succ . succ $ r], c <- [c .. succ . succ $ c]]
-
-{-
-Is this puzzle completely filled in with values?
--}
-isComplete :: Puzzle -> Bool
-isComplete = (==) 81 . length . catMaybes . elems
 
 {-
 Solve the given puzzle!
@@ -162,6 +116,9 @@ loadPuzzle = asArray . zip indices . map parse . filter (`elem` chars)
     parse :: Char -> Maybe Cell
     parse ' ' = Nothing
     parse char = Just . toEnum . subtract 1 . digitToInt $ char
+
+    asArray :: [(Index, Maybe Cell)] -> Puzzle
+    asArray vals = listArray ((One, One), (Nine, Nine)) (repeat Nothing) // vals
 
 main :: IO ()
 main = do
